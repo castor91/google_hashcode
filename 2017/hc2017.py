@@ -100,7 +100,10 @@ def main():
 			else:
 				break
 		print '{} {}'.format(cache._id, ' '.join(map(str, cache._video_list)))
-			
+	#print '{}'.format(len([x for x in cache_list if len(x._video_list) != 0]))
+        #for cache in cache_list:
+	#	print '{} {}'.format(cache._id, ' '.join(map(str, cache._video_list)))
+
 
 
 if __name__ == '__main__':
