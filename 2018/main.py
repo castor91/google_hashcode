@@ -58,7 +58,7 @@ class Game:
         #print (((ride.distance() + self._B * flag) / float(dist + 1)))
         wait = max(ride._s - dist - current_time, 0)
         if current_time + dist + wait + ride.distance() >= ride._f: return (-100, 0)
-        return ((ride.distance() + self._B * flag) / float(dist + 1), flag)
+        return ((ride.distance() + self._B * flag) / float(current_time + dist + wait + ride.distance()), flag)
 
     def alg3(self, car, current_time):
         ll = [(i, self.alg2(ride, car, current_time)) for i, ride in enumerate(self._free_rides)]
