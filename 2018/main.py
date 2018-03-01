@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 
 class Grid:
@@ -46,7 +46,7 @@ class Game:
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print 'main.py input_name output_name'
+        print('main.py input_name output_name')
         sys.exit(0)
     input_name = sys.argv[1]
     output_name = sys.argv[2]
@@ -57,21 +57,21 @@ if __name__ == '__main__':
     game = Game(grid, F)
 
 
-    for index in xrange(N):
+    for index in range(N):
         game.add_ride(Ride(index, map(int, input_file.readline().split(' '))))
 
     input_file.close()
 
-    print grid
-    print game
+    print(grid)
+    print(game)
     for ride in game._rides:
-        print ride
+        print(ride)
 
     game.solve()
 
     output_file = open(output_name, 'w')
 
-    for i in xrange(len(game._cars)):
+    for i in range(len(game._cars)):
         car = game._cars[i]
         output_file.write('{}\n'.format(i, ' '.join(car._rides)))
 
