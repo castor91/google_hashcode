@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import math
 
 def my_distance(a, b, x, y):
     return abs(a - x) + abs(b - y)
@@ -10,12 +11,13 @@ class Car:
         self._x = 0
         self._y = 0
         self._rides = []
+        self._current_time = 0
 
     def add_ride(self, ride):
         self._rides.append(ride)
 
     def __str__(self):
-        return '{} {}'.format(self._index, ' '.join(list(map(str, self._rides))))
+        return '{} {}'.format(len(self._rides), ' '.join(list(map(str, self._rides))))
 
 
 class Ride:
@@ -40,8 +42,9 @@ class Ride:
 
 
 class Game:
-    def __init__(self, F, T):
+    def __init__(self, F, T, B):
         self._T = T
+        self._B = B
         self._cars = [Car(i) for i in range(F)]
         self._free_rides = []
         self._handled_rides = []
@@ -50,19 +53,53 @@ class Game:
         self._free_rides.append(ride)
 
     def alg2(self, ride, car, current_time):
-        return 0
+        dist = my_distance(car._x, car._y, ride._a, ride._b)
+        flag = 1 if current_time + dist <= ride._s else 0
+        #print (((ride.distance() + self._B * flag) / float(dist + 1)))
+        wait = max(ride._s - dist - current_time, 0)
+        if current_time + dist + wait + ride.distance() >= ride._f: return (-100, 0)
+        return ((ride.distance() + self._B * flag) / float(dist + 1), flag)
+
+    def alg3(self, car, current_time):
+        ll = [(i, self.alg2(ride, car, current_time)) for i, ride in enumerate(self._free_rides)]
+        #print()
+        if len(ll) == 0: return None
+
+        return self._free_rides[max(ll, key=lambda x: x[1])[0]]
 
     def alg1(self, car, current_time):
-        ll = [self.alg2(ride, car, current_time) for ride in self._free_rides]
+        ll = [(i, self.alg2(ride, car, current_time)) for i, ride in enumerate(self._free_rides)]
+        #print()
         if len(ll) == 0: return None
-        return self._free_rides[max(ll)]
+        if max(ll, key=lambda x: x[1][1]) == 0: return None
+
+        return self._free_rides[max(ll, key=lambda x: x[1])[0]]
 
     def solve(self):
         for car in self._cars:
-            current_time = 0
+            current_time = car._current_time
             while current_time < self._T:
                 selected_ride = self.alg1(car, current_time)
-                print (selected_ride)
+                if selected_ride is None:
+                    # No bonus
+                    break
+                ride_distance = selected_ride.distance()
+                to_start = my_distance(car._x, car._y, selected_ride._a, selected_ride._b)
+                waiting = max(selected_ride._s - to_start - current_time, 0)
+                if current_time + to_start + waiting + ride_distance > self._T:
+                    break
+                car.add_ride(selected_ride)
+                self._handled_rides.append(selected_ride)
+                self._free_rides.remove(selected_ride) #TODO
+                current_time += to_start + waiting + ride_distance
+                car._x, car._y = selected_ride._x, selected_ride._y
+            print (car._index, current_time)
+            car._current_time = current_time
+
+        for car in self._cars[::-1]:
+            current_time = car._current_time
+            while current_time < self._T:
+                selected_ride = self.alg3(car, current_time)
                 if selected_ride is None:
                     break
                 ride_distance = selected_ride.distance()
@@ -75,6 +112,7 @@ class Game:
                 self._free_rides.remove(selected_ride) #TODO
                 current_time += to_start + waiting + ride_distance
                 car._x, car._y = selected_ride._x, selected_ride._y
+            print (car._index, current_time)
 
     def __str__(self):
         return 'GAME {}'.format(len(self._cars))
@@ -89,7 +127,7 @@ if __name__ == '__main__':
     input_file = open(input_name, 'r')
 
     R, C, F, N, B, T = map(int, input_file.readline().split(' '))
-    game = Game(F, T)
+    game = Game(F, T, B)
 
     for index in range(N):
         game.add_ride(Ride(index, map(int, input_file.readline().split(' '))))
